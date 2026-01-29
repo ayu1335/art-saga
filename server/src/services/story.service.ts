@@ -1,4 +1,5 @@
 import { geminiClient } from "../config/gemini.js";
+import { storyPrompt } from "../prompts/story.prompt.js";
 
 export async function generateStory(input?: string) {
   try {
@@ -6,28 +7,7 @@ export async function generateStory(input?: string) {
       model: "gemini-3-flash-preview",
     });
 
-    const prompt = `
-You are a manga writer.
-
-Generate a short black-and-white manga story with:
-- 4 scenes
-- Each scene has description and short dialog
-- Output STRICT JSON only
-
-Format:
-{
-  "title": "",
-  "scenes": [
-    {
-      "description": "",
-      "dialog": ["", ""]
-    }
-  ]
-}
-
-User input:
-${input ?? "None"}
-`;
+    const prompt = storyPrompt(input || "A thrilling adventure of a young hero in a futuristic city.");
 
     const result = await model.generateContent(prompt);
     const response = result.response;
