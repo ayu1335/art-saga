@@ -1,15 +1,36 @@
+// gemini-3-flash-preview
+import fs from "fs";
 import { geminiClient } from "../config/gemini.js";
 import { storyPrompt } from "../prompts/story.prompt.js";
 
-export async function generateStory(input?: string) {
+export async function generateStory(
+  story?: string,
+  imagePath?: string
+) {
   try {
     const model = geminiClient.getGenerativeModel({
       model: "gemini-3-flash-preview",
     });
 
-    const prompt = storyPrompt(input || "A thrilling adventure of a young hero in a futuristic city.");
+    const promptText = storyPrompt(
+      story || "A thrilling adventure of a young hero in a futuristic city."
+    );
 
-    const result = await model.generateContent(prompt);
+    // 🔑 Build multimodal content
+    const contents: any[] = [{ text: promptText }];
+
+    if (imagePath) {
+      const base64Image = fs.readFileSync(imagePath, "base64");
+
+      contents.push({
+        inlineData: {
+          mimeType: "image/jpeg", // or image/png
+          data: base64Image,
+        },
+      });
+    }
+
+    const result = await model.generateContent(contents);
     const response = result.response;
 
     if (!response) {
@@ -22,7 +43,7 @@ export async function generateStory(input?: string) {
       throw new Error("Empty response received from Gemini API");
     }
 
-    // Try to extract JSON from the response (in case it's wrapped in markdown code blocks)
+    // ---- JSON extraction (your logic, kept) ----
     let jsonText = text.trim();
     if (jsonText.startsWith("```json")) {
       jsonText = jsonText.replace(/^```json\s*/, "").replace(/\s*```$/, "");
@@ -30,14 +51,7 @@ export async function generateStory(input?: string) {
       jsonText = jsonText.replace(/^```\s*/, "").replace(/\s*```$/, "");
     }
 
-    try {
-      return JSON.parse(jsonText);
-    } catch (parseError) {
-      console.error("Failed to parse JSON. Raw response:", text);
-      throw new Error(
-        `Failed to parse story response as JSON: ${parseError instanceof Error ? parseError.message : String(parseError)}. Response: ${text.substring(0, 200)}`,
-      );
-    }
+    return JSON.parse(jsonText);
   } catch (error) {
     if (error instanceof Error) {
       throw error;
