@@ -13,12 +13,17 @@
   "type": "module",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@types/body-parser": "^1.19.6",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "body-parser": "^2.2.2",
     "cors": "^2.8.6",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "openai": "^6.17.0",
     "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.7"
   }
 }
